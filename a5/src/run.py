@@ -70,7 +70,11 @@ if args.variant == 'vanilla':
 
 elif args.variant == 'perceiver':
     # set mconf.perceiver, and mconf.bottleneck_dim parameters appropriately.
-    pass # [part g] Make some other model here
+    # [part g] Make some other model here
+    mconf.perceiver = True
+    mconf.bottleneck_dim = args.bottleneck_dim
+    model = model.GPT(mconf).to(device)
+    
 else:
     raise ValueError("Unknown model variant")
 
@@ -84,7 +88,18 @@ if args.function == 'pretrain':
     # - Goals:
     #     1. Pretrain the model on this corpus
     #     2. Save the resulting model in args.writing_params_path
-    
+    pretrain_config = trainer.TrainerConfig(
+        max_epochs=650,
+        batch_size=128,
+        learning_rate=args.pretrain_lr,
+        lr_decay=True,
+        warmup_tokens=512*20,
+        final_tokens=200*len(pretrain_dataset)*block_size,
+        num_workers=4,
+        writer=writer)
+    pretrain_trainer = trainer.Trainer(model, pretrain_dataset, None, pretrain_config)
+    pretrain_trainer.train()
+    torch.save(model.state_dict(), args.writing_params_path)
     # - Make sure to use the following hyperparameters for pretraining:
     # Hyperparameters for pretraining:
     # max_epochs=650
@@ -95,7 +110,6 @@ if args.function == 'pretrain':
     # final_tokens=200*len(pretrain_dataset)*block_size
     # num_workers=4
     # writer=writer 
-    raise NotImplementedError
 elif args.function == 'finetune':
     assert args.writing_params_path is not None
     assert args.finetune_corpus_path is not None

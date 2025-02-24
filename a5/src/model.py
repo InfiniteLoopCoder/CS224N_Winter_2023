@@ -110,7 +110,7 @@ class DownProjectBlock(nn.Module):
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
         ### Should be around 3-5 lines.
-        x = x_input + self.attn(x_kv=self.ln1(x_input),x_q=self.ln1(self.C))
+        x = self.attn(x_kv=self.ln1(x_input),x_q=self.ln1(self.C))
         x = x + self.mlp(self.ln2(x))
         return x
         ### END YOUR CODE
@@ -146,7 +146,7 @@ class UpProjectBlock(nn.Module):
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
         ### Should be around 3-5 lines.
-        x = y + self.attn(x_kv=self.ln1(y),x_q=self.ln1(self.x_input))
+        x = self.attn(x_kv=self.ln1(y),x_q=self.ln1(x_input))
         x = x + self.mlp(self.ln2(x))
         return x
         ### END YOUR CODE
